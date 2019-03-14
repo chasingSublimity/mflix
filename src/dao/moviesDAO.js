@@ -44,24 +44,16 @@ export default class MoviesDAO {
    * @returns {Promise<CountryResult>} A promise that will resolve to a list of CountryResults.
    */
   static async getMoviesByCountry(countries) {
-    /**
-    Ticket: Projection
-
-    Write a query that matches movies with the countries in the "countries"
-    list, but only returns the title and _id of each movie.
-
-    Remember that in MongoDB, the $in operator can be used with a list to
-    match one or more values of a specific field.
-    */
+    const query = {countries: {$in: countries}};
+    const options = {
+      projection: {
+        title: 1
+      }
+    };
 
     let cursor
     try {
-      // TODO Ticket: Projection
-      // Find movies matching the "countries" list, but only return the title
-      // and _id. Do not put a limit in your own implementation, the limit
-      // here is only included to avoid sending 46000 documents down the
-      // wire.
-      cursor = await movies.find().limit(1)
+      cursor = await movies.find(query, options)
     } catch (e) {
       console.error(`Unable to issue find command, ${e}`)
       return []
@@ -72,7 +64,7 @@ export default class MoviesDAO {
 
   /**
    * Finds and returns movies matching a given text in their title or description.
-   * @param {string} text - The text to match with.
+   * @param {String} text - The text to match with.
    * @returns {QueryParams} The QueryParams for text search
    */
   static textSearchQuery(text) {
@@ -116,7 +108,7 @@ export default class MoviesDAO {
 
     // TODO Ticket: Text and Subfield Search
     // Construct a query that will search for the chosen genre.
-    const query = {}
+    const query = {genres: {$in: searchGenre}}
     const project = {}
     const sort = DEFAULT_SORT
 
@@ -127,7 +119,7 @@ export default class MoviesDAO {
    *
    * @param {Object} filters - The search parameter to use in the query. Comes
    * in the form of `{cast: { $in: [...castMembers]}}`
-   * @param {number} page - The page of movies to retrieve.
+   * @param {Number} page - The page of movies to retrieve.
    * @param {number} moviesPerPage - The number of movies to display per page.
    * @returns {FacetedSearchReturn} FacetedSearchReturn
    */
