@@ -7,7 +7,7 @@ describe("Get Comments", async () => {
     await MoviesDAO.injectDB(global.mflixClient)
   })
 
-  test("Handles invalid ID error correctly", async () => {
+  test.only("Handles invalid ID error correctly", async () => {
     const response = await MoviesDAO.getMovieByID(badObjectId)
     expect(response).toBeNull()
   })

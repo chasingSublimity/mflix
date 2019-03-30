@@ -15,18 +15,6 @@ export default class CommentsDAO {
   }
 
   /**
-  Ticket: Create/Update Comments
-
-  For this ticket, you will need to implement the following two methods:
-
-  - addComment
-  - updateComment
-
-  You can find these methods below this docstring. Make sure to read the comments
-  to better understand the task.
-  */
-
-  /**
    * Inserts a comment into the `comments` collection, with the following fields:
 
      - "name", the name of the user posting the comment
@@ -42,10 +30,15 @@ export default class CommentsDAO {
    * @returns {DAOResponse} Returns an object with either DB response or "error"
    */
   static async addComment(movieId, user, comment, date) {
+    const { name, email } = user;
     try {
-      // TODO Ticket: Create/Update Comments
-      // Construct the comment document to be inserted into MongoDB.
-      const commentDoc = { someField: "someValue" }
+      const commentDoc = { 
+        name, 
+        email, 
+        movie_id: ObjectId(movieId), 
+        text: comment,
+        date 
+      }
 
       return await comments.insertOne(commentDoc)
     } catch (e) {
@@ -66,12 +59,9 @@ export default class CommentsDAO {
    */
   static async updateComment(commentId, userEmail, text, date) {
     try {
-      // TODO Ticket: Create/Update Comments
-      // Use the commentId and userEmail to select the proper comment, then
-      // update the "text" and "date" fields of the selected comment.
       const updateResponse = await comments.updateOne(
-        { someField: "someValue" },
-        { $set: { someOtherField: "someOtherValue" } },
+        { _id: commentId, email: userEmail },
+        { $set: { text, date } },
       )
 
       return updateResponse
@@ -91,10 +81,11 @@ export default class CommentsDAO {
     comments, but not anyone else's comments.
     */
 
+    const async = 'foobar';
+    console.log('async: ', async)
     try {
-      // TODO Ticket: Delete Comments
-      // Use the userEmail and commentId to delete the proper comment.
       const deleteResponse = await comments.deleteOne({
+        email: userEmail,
         _id: ObjectId(commentId),
       })
 
@@ -116,11 +107,18 @@ export default class CommentsDAO {
     try {
       // TODO Ticket: User Report
       // Return the 20 users who have commented the most on MFlix.
-      const pipeline = []
+      const pipeline = [
+          {
+            $sortByCount: '$email'
+          },
+          {
+            $limit: 20
+          }
+      ]
 
       // TODO Ticket: User Report
       // Use a more durable Read Concern here to make sure this data is not stale.
-      const readConcern = comments.readConcern
+      const readConcern = 'majority'
 
       const aggregateResult = await comments.aggregate(pipeline, {
         readConcern,
